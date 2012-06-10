@@ -1,0 +1,61 @@
+#!/bin/sh
+
+# Setup.
+USAGE='[options] <rev>{1,2}'
+LONG_USAGE='Exports diff files.'
+OPTIONS_KEEPDASHDASH=
+OPTIONS_SPEC='git export [options] <rev>{1,2}
+--
+o=      directory name to export
+h,help  show the help
+'
+SUBDIRECTORY_OK=
+. "$(git --exec-path)/git-sh-setup"
+. "$(git --exec-path)/git-sh-i18n"
+
+output='./export'
+
+# Process options.
+while getopts o: OPT
+do
+  case ${OPT} in
+    o)
+      output=${OPTARG}
+      ;;
+    \?)
+      usage
+      exit 1
+      ;;
+  esac
+done
+shift `expr ${OPTIND} - 1`
+if [ "$1" = '--' ] ; then
+  shift
+fi
+
+# Check rev parameters.
+if [ $# -eq 0 ] ; then
+  usage
+  exit 1
+fi
+FROM="$1"
+TO="$2"
+
+# Set export directory.
+now=`date +%Y%m%d%H%M%S`
+export_dir="${output}/${now}"
+
+# Export differences.
+for file in `git diff --name-only ${FROM} ${TO}`
+do
+  if [ -e ${file} ] ; then
+    DIR=`dirname "${export_dir}/${file}"`
+    if [ ! -d ${DIR} ] ; then
+      `mkdir -p ${DIR}`
+    fi
+    `cp ${file} ${export_dir}/${file}`
+  fi
+done
+
+exit 0
+

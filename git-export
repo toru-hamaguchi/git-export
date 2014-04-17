@@ -14,8 +14,8 @@ SUBDIRECTORY_OK=
 . "$(git --exec-path)/git-sh-i18n"
 
 if [ $# -eq 1 ]; then
-	usage
-	die
+  usage
+  die
 fi
 
 output_dir='./'
@@ -26,21 +26,21 @@ verbose=
 # Parse arguments.
 while getopts o:p:v OPT
 do
-	case ${OPT} in
-	o)
-	  output_dir=${OPTARG}
-		;;
-	p)
-	  prefix=${OPTARG}
-		;;
-	v)
-	  verbose=Yes
-		;;
-	\?)
-	  usage
-		die
-		;;
-	esac
+  case ${OPT} in
+  o)
+    output_dir=${OPTARG}
+    ;;
+  p)
+    prefix=${OPTARG}
+    ;;
+  v)
+    verbose=Yes
+    ;;
+  \?)
+    usage
+    die
+    ;;
+  esac
 done
 shift `expr ${OPTIND} - 1`
 
@@ -49,7 +49,7 @@ commit2=$2
 
 # Create export directory.
 if [ ! -d ${output_dir} ]; then
-	`mkdir -p ${output_dir}`
+  `mkdir -p ${output_dir}`
 fi
 
 # Export.
@@ -57,7 +57,7 @@ paths=`git diff --diff-filter=ACMR --name-only ${commit2} ${commit1}`
 git archive --prefix=${prefix}/ ${commit1} ${paths} | tar -C ${output_dir} -xf -
 
 if test -n "${verbose}"; then
-	say "\
+  say "\
 Location: ${output_dir}${prefix}/
 Files:
 ${paths}

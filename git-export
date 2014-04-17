@@ -6,6 +6,7 @@ OPTIONS_SPEC="\
 git export [options] [<commit>]
 --
 o=      directory name to export
+p=      prepend prefix to each pathname
 h,help  show the help"
 SUBDIRECTORY_OK=
 . "$(git --exec-path)/git-sh-setup"
@@ -17,13 +18,18 @@ if [ $# -eq 1 ]; then
 fi
 
 output_dir='./'
+now=`date +%Y%m%d%H%M%S`
+prefix=${now}
 
 # Parse arguments.
-while getopts o: OPT
+while getopts o:p: OPT
 do
 	case ${OPT} in
 	o)
 	  output_dir=${OPTARG}
+		;;
+	p)
+	  prefix=${OPTARG}
 		;;
 	\?)
 	  usage
@@ -35,7 +41,6 @@ shift `expr ${OPTIND} - 1`
 
 commit1=$1
 commit2=$2
-now=`date +%Y%m%d%H%M%S`
 
 # Create export directory.
 if [ ! -d ${output_dir} ]; then
@@ -44,6 +49,6 @@ fi
 
 # Export.
 paths=`git diff --diff-filter=ACMR --name-only ${commit2} ${commit1}`
-git archive --prefix=${now}/ ${commit1} ${paths} | tar -C ${output_dir} -xf -
+git archive --prefix=${prefix}/ ${commit1} ${paths} | tar -C ${output_dir} -xf -
 
 say 'Exported successfully.'

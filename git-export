@@ -1,61 +1,49 @@
 #!/bin/sh
 
-# Setup.
-USAGE='[options] <rev>{1,2}'
-LONG_USAGE='Exports diff files.'
+# Initialize.
 OPTIONS_KEEPDASHDASH=
-OPTIONS_SPEC='git export [options] <rev>{1,2}
+OPTIONS_SPEC="\
+git export [options] [<commit>]
 --
 o=      directory name to export
-h,help  show the help
-'
+h,help  show the help"
 SUBDIRECTORY_OK=
 . "$(git --exec-path)/git-sh-setup"
 . "$(git --exec-path)/git-sh-i18n"
 
-output='./export'
+if [ $# -eq 1 ]; then
+	usage
+	die
+fi
 
-# Process options.
+output_dir='./'
+
+# Parse arguments.
 while getopts o: OPT
 do
-  case ${OPT} in
-    o)
-      output=${OPTARG}
-      ;;
-    \?)
-      usage
-      exit 1
-      ;;
-  esac
+	case ${OPT} in
+	o)
+	  output_dir=${OPTARG}
+		;;
+	\?)
+	  usage
+		die
+		;;
+	esac
 done
 shift `expr ${OPTIND} - 1`
-if [ "$1" = '--' ] ; then
-  shift
-fi
 
-# Check rev parameters.
-if [ $# -eq 0 ] ; then
-  usage
-  exit 1
-fi
-FROM="$1"
-TO="$2"
-
-# Set export directory.
+commit1=$1
+commit2=$2
 now=`date +%Y%m%d%H%M%S`
-export_dir="${output}/${now}"
 
-# Export differences.
-for file in `git diff --name-only ${FROM} ${TO}`
-do
-  if [ -e ${file} ] ; then
-    DIR=`dirname "${export_dir}/${file}"`
-    if [ ! -d ${DIR} ] ; then
-      `mkdir -p ${DIR}`
-    fi
-    `cp ${file} ${export_dir}/${file}`
-  fi
-done
+# Create export directory.
+if [ ! -d ${output_dir} ]; then
+	`mkdir -p ${output_dir}`
+fi
 
-exit 0
+# Export.
+paths=`git diff --diff-filter=ACMR --name-only ${commit2} ${commit1}`
+git archive --prefix=${now}/ ${commit1} ${paths} | tar -C ${output_dir} -xf -
 
+say 'Exported successfully.'

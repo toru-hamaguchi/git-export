@@ -41,5 +41,10 @@ Copy `git-export` to `%YOUR_GIT_INSTALL_ROOT%/libexec/git-core/`.
 
 ## Change Log
 
+### 2014/04/17 v1.1
+* Change implementation from `git-diff + file copy` to `git-diff + git-archive + tar`.
+* Add `-p` option.
+* Add `-v` option.
+
 ### 2012/06/11 v1.0
 * First release.

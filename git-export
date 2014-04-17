@@ -7,6 +7,7 @@ git export [options] [<commit>]
 --
 o=      directory name to export
 p=      prepend prefix to each pathname
+v       show details about the results
 h,help  show the help"
 SUBDIRECTORY_OK=
 . "$(git --exec-path)/git-sh-setup"
@@ -20,9 +21,10 @@ fi
 output_dir='./'
 now=`date +%Y%m%d%H%M%S`
 prefix=${now}
+verbose=
 
 # Parse arguments.
-while getopts o:p: OPT
+while getopts o:p:v OPT
 do
 	case ${OPT} in
 	o)
@@ -30,6 +32,9 @@ do
 		;;
 	p)
 	  prefix=${OPTARG}
+		;;
+	v)
+	  verbose=Yes
 		;;
 	\?)
 	  usage
@@ -50,5 +55,13 @@ fi
 # Export.
 paths=`git diff --diff-filter=ACMR --name-only ${commit2} ${commit1}`
 git archive --prefix=${prefix}/ ${commit1} ${paths} | tar -C ${output_dir} -xf -
+
+if test -n "${verbose}"; then
+	say "\
+Location: ${output_dir}${prefix}/
+Files:
+${paths}
+--"
+fi
 
 say 'Exported successfully.'
